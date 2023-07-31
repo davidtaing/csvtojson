@@ -4,6 +4,7 @@ Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -25,6 +26,9 @@ var rootCmd = &cobra.Command{
 		if err != nil {
 			return
 		}
+
+		// add newline to JSON output
+		fmt.Println("")
 	},
 }
 
