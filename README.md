@@ -27,3 +27,5 @@ $ go run main.go -i data.csv | tee output.json
 - All stdout writes are piped as output. So all log messages have to be written to `os.Stderr` instead. This is what the std log package uses under the hood.
 
 - Marshalling data of unknown type to JSON
+
+- io.Pipe is for piping variables across different goroutines, and are not releated to Unix Pipes
