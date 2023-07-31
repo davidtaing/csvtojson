@@ -14,26 +14,27 @@ func ConvertCSVToJSON(path string) error {
 
 	if ext != ".csv" {
 		var m = fmt.Sprintf("File %s is not a .csv file\n", path)
-		fmt.Printf(m)
+		fmt.Fprintln(os.Stderr, m)
 		return errors.New(m)
 	}
 
 	records, err := readCSV(path)
 	if err != nil {
-		fmt.Printf("Failed to read csv %s\n", path)
+		var m = fmt.Sprintf("Failed to read csv %s\n", path)
+		fmt.Fprintln(os.Stderr, m)
 		return err
 	}
 
 	jsonBytes, err := marshalToJSON(records)
 	if err != nil {
-		fmt.Printf("Failed to marshal csv data")
+		fmt.Fprintln(os.Stderr, "Failed to marshal csv data")
 		return err
 	}
 
 	_, err = os.Stdout.Write(jsonBytes)
 
 	if err != nil {
-		fmt.Println("Error writing data to json", err)
+		fmt.Fprintln(os.Stderr, "Error writing data to json", err)
 		return err
 	}
 
@@ -81,7 +82,7 @@ func marshalToJSON(records [][]string) ([]byte, error) {
 
 	jsonBytes, err := json.Marshal(data)
 	if err != nil {
-		fmt.Println("Error marshaling data:", err)
+		fmt.Fprintln(os.Stderr, "Error marshaling data:", err)
 		return nil, err
 	}
 
