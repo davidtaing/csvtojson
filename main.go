@@ -8,13 +8,7 @@ import (
 )
 
 func main() {
-	f, err := os.Open("data.csv")
-
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	fmt.Println("Successfully opened the CSV file")
+	f := readCSV("data.csv")
 	defer f.Close()
 
 	r := csv.NewReader(f)
@@ -27,6 +21,18 @@ func main() {
 	for _, row := range records {
 		fmt.Println(row)
 	}
+}
+
+func readCSV(path string) *os.File {
+	f, err := os.Open(path)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println("Successfully opened the CSV file")
+
+	return f
 }
 
 func pipe() {
