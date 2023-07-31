@@ -1,21 +1,43 @@
 package main
 
 import (
+	"encoding/csv"
 	"fmt"
 	"io"
-	"log"
 	"os"
 )
 
 func main() {
-	r, w := io.Pipe()
+	fd, err := os.Open("data.csv")
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println("Successfully opened the CSV file")
+	defer fd.Close()
+
+	r := csv.NewReader(fd)
+	records, err := r.ReadAll()
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	for _, row := range records {
+		fmt.Println(row)
+	}
+}
+
+func pipe() {
+	_, w := io.Pipe()
 
 	go func() {
-		fmt.Fprint(w, "Hello, World!\n")
+		_, err := fmt.Fprint(w, "Hello World\n")
+
+		if err != nil {
+			fmt.Println(err)
+		}
 		w.Close()
 	}()
-
-	if _, err := io.Copy(os.Stdout, r); err != nil {
-		log.Fatal(err)
-	}
 }
