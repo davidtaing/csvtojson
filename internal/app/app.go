@@ -49,6 +49,8 @@ func readCSV(path string) ([][]string, error) {
 		return nil, err
 	}
 
+	fmt.Fprintln(os.Stderr, "Successfully opened the CSV file")
+
 	r := csv.NewReader(f)
 	records, err := r.ReadAll()
 
