@@ -2,7 +2,7 @@
 
 Converts CSV to JSON and outputs to stdout.
 
-Chain with the `tee` cli
+Pipe stdout to the `tee` CLI for better results.
 
 ## Tech
 
