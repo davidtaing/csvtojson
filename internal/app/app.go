@@ -3,11 +3,21 @@ package app
 import (
 	"encoding/csv"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 )
 
 func ConvertCSVToJSON(path string) error {
+	ext := filepath.Ext(path)
+
+	if ext != ".csv" {
+		var m = fmt.Sprintf("File %s is not a .csv file\n", path)
+		fmt.Printf(m)
+		return errors.New(m)
+	}
+
 	records, err := readCSV(path)
 	if err != nil {
 		fmt.Printf("Failed to read csv %s\n", path)
