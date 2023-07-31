@@ -2,8 +2,8 @@ package main
 
 import (
 	"encoding/csv"
+	"encoding/json"
 	"fmt"
-	"io"
 	"os"
 )
 
@@ -16,10 +16,36 @@ func main() {
 
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
 
-	for _, row := range records {
-		fmt.Println(row)
+	var data []map[string]string
+
+	if len(records) > 0 {
+		columnNames := records[0]
+
+		for _, row := range records[1:] {
+			record := make(map[string]string)
+			for i, value := range row {
+				if i < len(columnNames) {
+					record[columnNames[i]] = value
+				}
+			}
+			data = append(data, record)
+		}
+	}
+
+	jsonBytes, err := json.Marshal(data)
+	if err != nil {
+		fmt.Println("Error marshaling data:", err)
+		return
+	}
+
+	_, err = os.Stdout.Write(jsonBytes)
+
+	if err != nil {
+		fmt.Println("Error writing:", err)
+		return
 	}
 }
 
@@ -28,6 +54,7 @@ func readCSV(path string) *os.File {
 
 	if err != nil {
 		fmt.Println(err)
+		return nil
 	}
 
 	fmt.Println("Successfully opened the CSV file")
