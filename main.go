@@ -8,14 +8,11 @@ import (
 )
 
 func main() {
-	f := readCSV("data.csv")
-	defer f.Close()
+	var p = "data.csv"
 
-	r := csv.NewReader(f)
-	records, err := r.ReadAll()
-
+	records, err := readCSV(p)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Printf("Error reading csv %s\n", p)
 		return
 	}
 
@@ -49,15 +46,24 @@ func main() {
 	}
 }
 
-func readCSV(path string) *os.File {
+func readCSV(path string) ([][]string, error) {
 	f, err := os.Open(path)
+	defer f.Close()
 
 	if err != nil {
 		fmt.Println(err)
-		return nil
+		return nil, err
 	}
 
 	fmt.Println("Successfully opened the CSV file")
 
-	return f
+	r := csv.NewReader(f)
+	records, err := r.ReadAll()
+
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	return records, nil
 }
