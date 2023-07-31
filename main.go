@@ -8,16 +8,16 @@ import (
 )
 
 func main() {
-	fd, err := os.Open("data.csv")
+	f, err := os.Open("data.csv")
 
 	if err != nil {
 		fmt.Println(err)
 	}
 
 	fmt.Println("Successfully opened the CSV file")
-	defer fd.Close()
+	defer f.Close()
 
-	r := csv.NewReader(fd)
+	r := csv.NewReader(f)
 	records, err := r.ReadAll()
 
 	if err != nil {
