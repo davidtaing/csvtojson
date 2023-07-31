@@ -25,7 +25,7 @@ func main() {
 	_, err = os.Stdout.Write(jsonBytes)
 
 	if err != nil {
-		fmt.Println("Error writing:", err)
+		fmt.Println("Error writing data to json", err)
 		return
 	}
 }
