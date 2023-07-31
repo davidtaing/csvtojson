@@ -34,16 +34,3 @@ func readCSV(path string) *os.File {
 
 	return f
 }
-
-func pipe() {
-	_, w := io.Pipe()
-
-	go func() {
-		_, err := fmt.Fprint(w, "Hello World\n")
-
-		if err != nil {
-			fmt.Println(err)
-		}
-		w.Close()
-	}()
-}
