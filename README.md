@@ -13,13 +13,23 @@ Pipe stdout to the `tee` CLI for better results.
 
 There is an example data.csv file that you can use to run this project.
 
-To run this CLI, clone the project and run the following command.
+### Reading from CSV file
 
 ```
 $ go run main.go -i data.csv
 
-// combine with unix pipe & tee <output_filepath>
+// combine with tee to output to file
 $ go run main.go -i data.csv | tee output.json
+```
+
+### Reading from stdin
+
+```
+$ cat data.csv | go run main.go
+
+// can also be outputted to file via tee
+$ cat data.csv | go run main.go | tee output.json
+
 ```
 
 ## Things I Learnt
