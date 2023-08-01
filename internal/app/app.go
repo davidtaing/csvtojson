@@ -3,29 +3,12 @@ package app
 import (
 	"encoding/csv"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"os"
-	"path/filepath"
 )
 
-func ConvertCSVToJSON(path string) error {
-	ext := filepath.Ext(path)
-
-	if ext != ".csv" {
-		var m = fmt.Sprintf("File %s is not a .csv file\n", path)
-		fmt.Fprintln(os.Stderr, m)
-		return errors.New(m)
-	}
-
-	records, err := readCSV(path)
-	if err != nil {
-		var m = fmt.Sprintf("Failed to read csv %s\n", path)
-		fmt.Fprintln(os.Stderr, m)
-		return err
-	}
-
-	jsonBytes, err := marshalToJSON(records)
+func ConvertCSVToJSON(records [][]string) error {
+	jsonBytes, err := MarshalToJSON(records)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Failed to marshal csv data")
 		return err
@@ -41,12 +24,11 @@ func ConvertCSVToJSON(path string) error {
 	return nil
 }
 
-func readCSV(path string) ([][]string, error) {
+func ReadCSVFromFile(path string) ([][]string, error) {
 	f, err := os.Open(path)
 	defer f.Close()
 
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 
@@ -56,14 +38,24 @@ func readCSV(path string) ([][]string, error) {
 	records, err := r.ReadAll()
 
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 
 	return records, nil
 }
 
-func marshalToJSON(records [][]string) ([]byte, error) {
+func ReadCSVFromStdin() ([][]string, error) {
+	r := csv.NewReader(os.Stdin)
+	records, err := r.ReadAll()
+
+	if err != nil {
+		return nil, err
+	}
+
+	return records, nil
+}
+
+func MarshalToJSON(records [][]string) ([]byte, error) {
 	var data []map[string]string
 
 	if len(records) > 0 {

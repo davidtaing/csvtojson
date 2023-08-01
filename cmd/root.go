@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/spf13/cobra"
-
 	"github.com/davidtaing/csvtojson/internal/app"
+	"github.com/spf13/cobra"
 )
 
 var (
@@ -17,14 +16,28 @@ var rootCmd = &cobra.Command{
 	Use:   "csvtojson",
 	Short: "Convert a CSV file to JSON. Outputted to stdout",
 	Run: func(cmd *cobra.Command, args []string) {
-		err := app.ConvertCSVToJSON(input)
+		source := "stdin"
+		records, err := app.ReadCSVFromStdin()
+
+		if len(records) == 0 {
+			source = fmt.Sprintf("file: %s", input)
+			records, err = app.ReadCSVFromFile(input)
+		}
 
 		if err != nil {
+			m := fmt.Sprintf("Error reading from %s", source)
+			fmt.Fprintln(os.Stderr, m)
 			return
 		}
 
-		// add newline to JSON output
-		fmt.Println("")
+		err = app.ConvertCSVToJSON(records)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "Failed to marshal csv data")
+			return
+		}
+
+		// Bump terminal prompt to sit on new line
+		fmt.Print("\n")
 	},
 }
 
