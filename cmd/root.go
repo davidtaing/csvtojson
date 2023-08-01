@@ -15,35 +15,37 @@ var (
 var rootCmd = &cobra.Command{
 	Use:   "csvtojson",
 	Short: "Convert a CSV file to JSON. Outputted to stdout",
-	Run: func(cmd *cobra.Command, args []string) {
-		var (
-			records [][]string
-			err     error
-		)
+	Run:   CSVToJSONCommand,
+}
 
-		if input == "" {
-			fmt.Fprintln(os.Stderr, "reading csv from stdin")
-			records, err = app.ReadCSVFromStdin()
-		} else {
-			fmt.Fprintln(os.Stderr, "reading csv from file")
-			records, err = app.ReadCSVFromFile(input)
-		}
+func CSVToJSONCommand(cmd *cobra.Command, args []string) {
+	var (
+		records [][]string
+		err     error
+	)
 
-		if err != nil {
-			m := fmt.Sprintf("Read failed %s", err)
-			fmt.Fprintln(os.Stderr, m, err)
-			return
-		}
+	if input == "" {
+		fmt.Fprintln(os.Stderr, "reading csv from stdin")
+		records, err = app.ReadCSVFromStdin()
+	} else {
+		fmt.Fprintln(os.Stderr, "reading csv from file")
+		records, err = app.ReadCSVFromFile(input)
+	}
 
-		err = app.ConvertCSVToJSON(records)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, "Failed to marshal csv data")
-			return
-		}
+	if err != nil {
+		m := fmt.Sprintf("Read failed %s", err)
+		fmt.Fprintln(os.Stderr, m, err)
+		return
+	}
 
-		// Bump terminal prompt to sit on new line
-		fmt.Print("\n")
-	},
+	err = app.ConvertCSVToJSON(records)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Failed to marshal csv data")
+		return
+	}
+
+	// Bump terminal prompt to sit on new line
+	fmt.Print("\n")
 }
 
 func Execute() {
