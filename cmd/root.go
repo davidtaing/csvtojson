@@ -16,17 +16,22 @@ var rootCmd = &cobra.Command{
 	Use:   "csvtojson",
 	Short: "Convert a CSV file to JSON. Outputted to stdout",
 	Run: func(cmd *cobra.Command, args []string) {
-		source := "stdin"
-		records, err := app.ReadCSVFromStdin()
+		var (
+			records [][]string
+			err     error
+		)
 
-		if len(records) == 0 {
-			source = fmt.Sprintf("file: %s", input)
+		if input == "" {
+			fmt.Fprintln(os.Stderr, "reading csv from stdin")
+			records, err = app.ReadCSVFromStdin()
+		} else {
+			fmt.Fprintln(os.Stderr, "reading csv from file")
 			records, err = app.ReadCSVFromFile(input)
 		}
 
 		if err != nil {
-			m := fmt.Sprintf("Error reading from %s", source)
-			fmt.Fprintln(os.Stderr, m)
+			m := fmt.Sprintf("Read failed %s", err)
+			fmt.Fprintln(os.Stderr, m, err)
 			return
 		}
 
