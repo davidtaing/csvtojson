@@ -21,12 +21,13 @@ var rootCmd = &cobra.Command{
 
 func CSVToJSONCommand(cmd *cobra.Command, args []string) {
 	var (
-		r       io.Reader
-		err     error
-		csvFile *os.File
+		r             io.Reader
+		err           error
+		csvFile       *os.File
+		inputFromFile bool = input != ""
 	)
 
-	if input != "" {
+	if inputFromFile {
 		csvFile, err = app.OpenCSVFile(input)
 		defer csvFile.Close()
 
@@ -37,6 +38,8 @@ func CSVToJSONCommand(cmd *cobra.Command, args []string) {
 
 		r = csvFile
 	} else {
+		fmt.Fprintln(os.Stderr, "Reading from stdin")
+
 		fi, _ := os.Stdin.Stat()
 
 		if fi.Size() == 0 {
