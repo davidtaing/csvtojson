@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/davidtaing/csvtojson/internal/app"
@@ -20,21 +21,30 @@ var rootCmd = &cobra.Command{
 
 func CSVToJSONCommand(cmd *cobra.Command, args []string) {
 	var (
-		err error
-		r   *os.File
+		r       io.Reader
+		err     error
+		csvFile *os.File
 	)
 
 	if input != "" {
-		r, err = app.OpenCSVFile(input)
-		defer r.Close()
-	} else {
-		r = os.Stdin
-		// todo check stdin input size
-	}
+		csvFile, err = app.OpenCSVFile(input)
+		defer csvFile.Close()
 
-	if err != nil {
-		m := fmt.Sprintf("Failed to read from file: %s", input)
-		fmt.Fprintln(os.Stderr, m)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to read input file: %s\n", input)
+			return
+		}
+
+		r = csvFile
+	} else {
+		fi, _ := os.Stdin.Stat()
+
+		if fi.Size() == 0 {
+			fmt.Fprintln(os.Stderr, "No input detected from stdin")
+			return
+		}
+
+		r = os.Stdin
 	}
 
 	err = app.ConvertCSVToJSON(r, os.Stdout)
