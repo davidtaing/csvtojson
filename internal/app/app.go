@@ -9,8 +9,7 @@ import (
 )
 
 func OpenCSVFile(p string) (*os.File, error) {
-	m := fmt.Sprintf("Reading from CSV file: %s", p)
-	fmt.Fprintln(os.Stderr, m)
+	fmt.Fprintf(os.Stderr, "Reading from CSV file: %s\n", p)
 
 	f, err := os.Open(p)
 	return f, err
