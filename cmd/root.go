@@ -39,14 +39,6 @@ func CSVToJSONCommand(cmd *cobra.Command, args []string) {
 		r = csvFile
 	} else {
 		fmt.Fprintln(os.Stderr, "Reading from stdin")
-
-		fi, _ := os.Stdin.Stat()
-
-		if fi.Size() == 0 {
-			fmt.Fprintln(os.Stderr, "No input detected from stdin")
-			return
-		}
-
 		r = os.Stdin
 	}
 
