@@ -4,17 +4,34 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 )
 
-func ConvertCSVToJSON(records [][]string) error {
+func OpenCSVFile(p string) (*os.File, error) {
+	m := fmt.Sprintf("Reading from CSV file: %s", p)
+	fmt.Fprintln(os.Stderr, m)
+
+	f, err := os.Open(p)
+	return f, err
+}
+
+func ConvertCSVToJSON(r io.Reader, w io.Writer) error {
+	csvReader := csv.NewReader(r)
+	records, err := csvReader.ReadAll()
+
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Failed to read from input.")
+		return err
+	}
+
 	jsonBytes, err := MarshalToJSON(records)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Failed to marshal csv data")
 		return err
 	}
 
-	_, err = os.Stdout.Write(jsonBytes)
+	_, err = w.Write(jsonBytes)
 
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Error writing data to json", err)

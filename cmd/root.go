@@ -20,27 +20,27 @@ var rootCmd = &cobra.Command{
 
 func CSVToJSONCommand(cmd *cobra.Command, args []string) {
 	var (
-		records [][]string
-		err     error
+		err error
+		r   *os.File
 	)
 
-	if input == "" {
-		fmt.Fprintln(os.Stderr, "reading csv from stdin")
-		records, err = app.ReadCSVFromStdin()
+	if input != "" {
+		r, err = app.OpenCSVFile(input)
+		defer r.Close()
 	} else {
-		fmt.Fprintln(os.Stderr, "reading csv from file")
-		records, err = app.ReadCSVFromFile(input)
+		r = os.Stdin
+		// todo check stdin input size
 	}
 
 	if err != nil {
-		m := fmt.Sprintf("Read failed %s", err)
-		fmt.Fprintln(os.Stderr, m, err)
-		return
+		m := fmt.Sprintf("Failed to read from file: %s", input)
+		fmt.Fprintln(os.Stderr, m)
 	}
 
-	err = app.ConvertCSVToJSON(records)
+	err = app.ConvertCSVToJSON(r, os.Stdout)
+
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "Failed to marshal csv data")
+		fmt.Fprintln(os.Stderr, err)
 		return
 	}
 
