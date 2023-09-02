@@ -1,9 +1,11 @@
 package cmd
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"os"
+	"time"
 
 	"github.com/davidtaing/csvtojson/internal/app"
 	"github.com/spf13/cobra"
@@ -39,7 +41,25 @@ func CSVToJSONCommand(cmd *cobra.Command, args []string) {
 		r = csvFile
 	} else {
 		fmt.Fprintln(os.Stderr, "Reading from stdin")
-		r = os.Stdin
+
+		// Use a goroutine with a timeout to read from stdin
+		done := make(chan bool)
+		var buf bytes.Buffer
+		go func() {
+			_, err := io.Copy(&buf, os.Stdin)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Failed to read from stdin: %v\n", err)
+			}
+			done <- true
+		}()
+
+		select {
+		case <-done:
+			r = &buf
+		case <-time.After(1 * time.Second):
+			fmt.Fprintln(os.Stderr, "Timed out waiting for input from stdin")
+			return
+		}
 	}
 
 	err = app.ConvertCSVToJSON(r, os.Stdout)
