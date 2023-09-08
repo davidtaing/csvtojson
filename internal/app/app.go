@@ -1,11 +1,14 @@
 package app
 
 import (
+	"bytes"
 	"encoding/csv"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
+	"time"
 )
 
 func OpenCSVFile(p string) (*os.File, error) {
@@ -40,35 +43,30 @@ func ConvertCSVToJSON(r io.Reader, w io.Writer) error {
 	return nil
 }
 
-func ReadCSVFromFile(path string) ([][]string, error) {
-	f, err := os.Open(path)
-	defer f.Close()
+func ReadCSVFromStdin() (io.Reader, error) {
+	fmt.Fprintln(os.Stderr, "Reading from stdin")
 
-	if err != nil {
-		return nil, err
+	done := make(chan bool)
+	var buf bytes.Buffer
+	go func() {
+		_, err := io.Copy(&buf, os.Stdin)
+		if err != nil {
+			done <- false
+		} else {
+			done <- true
+		}
+	}()
+
+	select {
+	case success := <-done:
+		if !success {
+			return nil, errors.New("Failed to read from stdin")
+		}
+
+		return &buf, nil
+	case <-time.After(1 * time.Second):
+		return nil, errors.New("Failed to read from stdin")
 	}
-
-	fmt.Fprintln(os.Stderr, "Successfully opened the CSV file")
-
-	r := csv.NewReader(f)
-	records, err := r.ReadAll()
-
-	if err != nil {
-		return nil, err
-	}
-
-	return records, nil
-}
-
-func ReadCSVFromStdin() ([][]string, error) {
-	r := csv.NewReader(os.Stdin)
-	records, err := r.ReadAll()
-
-	if err != nil {
-		return nil, err
-	}
-
-	return records, nil
 }
 
 func MarshalToJSON(records [][]string) ([]byte, error) {
