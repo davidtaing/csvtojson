@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -18,10 +19,10 @@ var (
 var rootCmd = &cobra.Command{
 	Use:   "csvtojson",
 	Short: "Convert a CSV file to JSON. Outputted to stdout",
-	Run:   CSVToJSONCommand,
+	RunE:  CSVToJSONCommand,
 }
 
-func CSVToJSONCommand(cmd *cobra.Command, args []string) {
+func CSVToJSONCommand(cmd *cobra.Command, args []string) error {
 	var (
 		r             io.Reader
 		err           error
@@ -34,8 +35,7 @@ func CSVToJSONCommand(cmd *cobra.Command, args []string) {
 		defer csvFile.Close()
 
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Failed to read input file: %s\n", input)
-			return
+			return err
 		}
 
 		r = csvFile
@@ -49,28 +49,33 @@ func CSVToJSONCommand(cmd *cobra.Command, args []string) {
 			_, err := io.Copy(&buf, os.Stdin)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Failed to read from stdin: %v\n", err)
+				done <- false
+			} else {
+				done <- true
 			}
-			done <- true
 		}()
 
 		select {
-		case <-done:
+		case success := <-done:
+			if !success {
+				return errors.New("Failed to read from stdin")
+			}
 			r = &buf
 		case <-time.After(1 * time.Second):
-			fmt.Fprintln(os.Stderr, "Timed out waiting for input from stdin")
-			return
+			return errors.New("Failed to read from stdin")
 		}
 	}
 
 	err = app.ConvertCSVToJSON(r, os.Stdout)
 
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		return
+		return err
 	}
 
-	// Bump terminal prompt to sit on new line
-	fmt.Print("\n")
+	// Pad output so terminal return sits on new line
+	fmt.Println()
+	fmt.Fprintf(os.Stderr, "Exiting\n")
+	return nil
 }
 
 func Execute() {
